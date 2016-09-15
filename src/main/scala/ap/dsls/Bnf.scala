@@ -131,7 +131,7 @@ object ScalaSerializer
     def toScala = r.expression.terms match {
       case term::Nil =>
         val args = term.factors.map(_.toScalaArg).mkString(", ")
-        s"case class ${r.id}($args)"
+        s"${r.heading.toScala}\ncase class ${r.id}($args)"
 
       case _ => ??? //zipWithIndex and generate one class per alternative (?)
     }
