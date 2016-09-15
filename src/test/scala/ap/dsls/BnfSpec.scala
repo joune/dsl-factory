@@ -57,17 +57,17 @@ class BnfSpec extends FlatSpec with Matchers
 
   it should "parse a function0" in {
     val parsed = ReportingParseRunner(parser.function).run("$fun").ok
-    parsed.result.get shouldEqual Function(Identifier("fun"),None)
+    parsed.result.get shouldEqual Function("fun",None)
   }
 
   it should "parse a function(string)" in {
     val parsed = ReportingParseRunner(parser.function).run("$fun('arg')").ok
-    parsed.result.get shouldEqual Function(Identifier("fun"),Some(List(StringArgument("arg"))))
+    parsed.result.get shouldEqual Function("fun",Some(List(StringArgument("arg"))))
   }
 
   it should "parse a function(int,int)" in {
     val parsed = ReportingParseRunner(parser.function).run("$fun(12,34)").ok
-    parsed.result.get shouldEqual Function(Identifier("fun"),Some(List(IntArgument(12),IntArgument(34))))
+    parsed.result.get shouldEqual Function("fun",Some(List(IntArgument(12),IntArgument(34))))
   }
 
   it should "parse an identifier expression" in {
@@ -123,6 +123,9 @@ class BnfSpec extends FlatSpec with Matchers
             List(Term(List(
               Literal("hello"),Literal("world"))))))
       ))
+
+    import ParserGenerator._
+    println(parsed.result.get.asInstanceOf[Root].toParser)
   }
 
   it should "parse a grammar file " in {

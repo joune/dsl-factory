@@ -39,7 +39,7 @@ object Bnf {
   case class Ntimes(n:Int, id:Identifier) extends Factor
   case class Repeat(expression:Expression) extends Factor
   case class Group(expression:Expression) extends Factor
-  case class Function(id:Identifier,args:Option[List[Argument]]) extends Factor
+  case class Function(name:String,args:Option[List[Argument]]) extends Factor
   sealed trait Argument
   case class StringArgument(s:String) extends Argument
   case class IntArgument(i:Int) extends Argument
@@ -76,7 +76,7 @@ class Bnf extends Parser
   def group:Rule1[Group] = rule { "(" ~ expression ~ ")" } ~~> { e:Expression => Group(e) }
 
   def function:Rule1[Function] = rule { "$" ~ identifier ~ optional("(" ~ oneOrMore(argument, ",") ~ ")") } ~~> { 
-    (id:Identifier,args:Option[List[Argument]]) => Function(id,args)
+    (id:Identifier,args:Option[List[Argument]]) => Function(id.s,args)
   }
 
   def argument:Rule1[Argument] = rule {
@@ -151,9 +151,47 @@ object ParserGenerator
   import Bnf._
 
   sealed trait Node2Parser { def toParser:String }
-  implicit class Literal2Parser(l:Literal) extends Node2Parser
+  implicit class Root2Parser(r:Root) extends Node2Parser
   {
-    def toParser = s"""rule { "${l.s}" }"""
+    def toParser = {
+      val rules = r.rules.map(_.toParser).mkString("\n")
+      s"""package FIXME
+      |import org.parboiled.scala._
+      |class FIXME extends Parser {
+      |$rules
+      |}""".stripMargin
+    }
+  }
+  implicit class Production2Parser(r:Production) extends Node2Parser
+  {
+    def toParser = s"def ${r.id} = rule { ${r.expression.toParser} }"
+  }
+  implicit class Expression2Parser(e:Expression) extends Node2Parser
+  {
+    def toParser = e.terms.map(_.toParser).mkString(" | ")
+  }
+  implicit class Term2Parser(t:Term) extends Node2Parser
+  {
+    def toParser = t.factors.map(_.toParser).mkString(" ~ ")
+  }
+  implicit class Factor2Parser(f:Factor) extends Node2Parser
+  {
+    def toParser = f match {
+      case Identifier(i) => i
+      case Literal(s)    =>s""""$s""""
+      case Optional(e)   => s"optional(${e.toParser})"
+      case Ntimes(n,id)  => s"nTimes($n, $id)"
+      case Repeat(e)     => s"oneOrMore(${e.toParser})"
+      case Group(e)      => s"(${e.toParser})"
+      case Function(id,params) =>
+        // these are predef functions of the DSL
+        params match {
+        // if no param, just return the function name, it's defined elsewhere
+        case None => id
+        // if params, generate a rule with the given param values
+        case Some(args) => ??? //FIXME
+      }
+    }
   }
 }
 
