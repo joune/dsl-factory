@@ -1,0 +1,11 @@
+# Gradle
+.gradle/
+build/
+
+# Vim
+*.swp
+.*.swo
+
+#java/scala
+*.class
+*.jar

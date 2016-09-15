@@ -1,0 +1,26 @@
+apply plugin: 'scala'
+
+ext {
+  scalaMajorVersion = '2.11'
+  scalaVersion = scalaMajorVersion+'.8'
+  scalaTestVersion = '3.0.0'
+  junitVersion = '4.11'
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+dependencies {
+  compile "org.scala-lang:scala-library:$scalaVersion",
+          "org.parboiled:parboiled-scala_${scalaMajorVersion}:1.1.7",
+          "org.parboiled:parboiled-core:1.1.7"
+
+  testCompile "org.scala-lang:scala-library:$scalaVersion",
+              "junit:junit:$junitVersion"
+
+  testCompile ("org.scalatest:scalatest_$scalaMajorVersion:$scalaTestVersion"){
+    exclude group: 'org.scala-lang'
+  }
+}

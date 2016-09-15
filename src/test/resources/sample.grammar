@@ -1,0 +1,7 @@
+# Sample grammar definition
+# For test (still touchy with whitespaces!)
+{my_grammar=header body footer;
+header='<H>' $string(5);
+body={'<B>' $date("YYYY-mm-dd")};
+footer='<F>' $decimal(3,2);
+}
